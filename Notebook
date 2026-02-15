@@ -1,1 +1,586 @@
-{"metadata":{"kernelspec":{"language":"python","display_name":"Python 3","name":"python3"},"language_info":{"name":"python","version":"3.12.12","mimetype":"text/x-python","codemirror_mode":{"name":"ipython","version":3},"pygments_lexer":"ipython3","nbconvert_exporter":"python","file_extension":".py"},"kaggle":{"accelerator":"none","dataSources":[{"sourceId":127742,"databundleVersionId":15295088,"sourceType":"competition"}],"dockerImageVersionId":31259,"isInternetEnabled":true,"language":"python","sourceType":"notebook","isGpuEnabled":false}},"nbformat_minor":4,"nbformat":4,"cells":[{"cell_type":"code","source":"# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session","metadata":{"_uuid":"8f2839f25d086af736a60e9eeb907d3b93b6e0e5","_cell_guid":"b1076dfc-b9ad-4769-8c92-a6c4dae69d19","trusted":true,"execution":{"iopub.status.busy":"2026-02-15T07:05:31.996605Z","iopub.execute_input":"2026-02-15T07:05:31.996966Z","iopub.status.idle":"2026-02-15T07:05:33.126679Z","shell.execute_reply.started":"2026-02-15T07:05:31.996929Z","shell.execute_reply":"2026-02-15T07:05:33.125131Z"}},"outputs":[{"name":"stdout","text":"/kaggle/input/comment-category-prediction-challenge/Sample.csv\n/kaggle/input/comment-category-prediction-challenge/train.csv\n/kaggle/input/comment-category-prediction-challenge/test.csv\n","output_type":"stream"}],"execution_count":1},{"cell_type":"code","source":"import pandas as pd\nfrom sklearn.dummy import DummyClassifier\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score\n\n# Load data\ntrain_df = pd.read_csv(\"/kaggle/input/comment-category-prediction-challenge/train.csv\")\ntest_df = pd.read_csv(\"/kaggle/input/comment-category-prediction-challenge/test.csv\")\nsample_df = pd.read_csv(\"/kaggle/input/comment-category-prediction-challenge/Sample.csv\")\n\nX = train_df[\"comment\"]\ny = train_df[\"label\"]\n\n# Train / validation split\nX_train, X_val, y_train, y_val = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y\n)\n\ndummy = DummyClassifier(strategy=\"most_frequent\")\ndummy.fit(X_train.values.reshape(-1, 1), y_train)\n\n# Validation accuracy\ny_val_pred = dummy.predict(X_val.values.reshape(-1, 1))\nprint(\"Validation Accuracy:\", accuracy_score(y_val, y_val_pred))\n\n# Test predictions\ntest_preds = dummy.predict(test_df[\"comment\"].values.reshape(-1, 1))\n\nsubmission = pd.DataFrame({\n    \"ID\": sample_df[\"ID\"],\n    \"label\": test_preds\n})\n\nsubmission.to_csv(\"submission.csv\", index=False)","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2026-02-15T07:06:50.832850Z","iopub.execute_input":"2026-02-15T07:06:50.833622Z","iopub.status.idle":"2026-02-15T07:06:53.267999Z","shell.execute_reply.started":"2026-02-15T07:06:50.833575Z","shell.execute_reply":"2026-02-15T07:06:53.266913Z"}},"outputs":[{"name":"stdout","text":"Validation Accuracy: 0.5766414141414141\n","output_type":"stream"}],"execution_count":3},{"cell_type":"code","source":"","metadata":{"trusted":true},"outputs":[],"execution_count":null}]}
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "519b46cd",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:18.634195Z",
+     "iopub.status.busy": "2026-02-15T16:42:18.633852Z",
+     "iopub.status.idle": "2026-02-15T16:42:19.742702Z",
+     "shell.execute_reply": "2026-02-15T16:42:19.741352Z"
+    },
+    "papermill": {
+     "duration": 1.115561,
+     "end_time": "2026-02-15T16:42:19.745205",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:18.629644",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/comment-category-prediction-challenge/Sample.csv\n",
+      "/kaggle/input/comment-category-prediction-challenge/train.csv\n",
+      "/kaggle/input/comment-category-prediction-challenge/test.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "# This Python 3 environment comes with many helpful analytics libraries installed\n",
+    "# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n",
+    "# For example, here's several helpful packages to load\n",
+    "\n",
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))\n",
+    "\n",
+    "# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n",
+    "# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "404238ff",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:19.752466Z",
+     "iopub.status.busy": "2026-02-15T16:42:19.751170Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.484569Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.483434Z"
+    },
+    "papermill": {
+     "duration": 4.73954,
+     "end_time": "2026-02-15T16:42:24.487121",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:19.747581",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Validation Accuracy: 0.5766414141414141\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "from sklearn.dummy import DummyClassifier\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.metrics import accuracy_score\n",
+    "\n",
+    "# Load data\n",
+    "train_df = pd.read_csv(\"/kaggle/input/comment-category-prediction-challenge/train.csv\")\n",
+    "test_df = pd.read_csv(\"/kaggle/input/comment-category-prediction-challenge/test.csv\")\n",
+    "sample_df = pd.read_csv(\"/kaggle/input/comment-category-prediction-challenge/Sample.csv\")\n",
+    "\n",
+    "X = train_df[\"comment\"]\n",
+    "y = train_df[\"label\"]\n",
+    "\n",
+    "# Train / validation split\n",
+    "X_train, X_val, y_train, y_val = train_test_split(\n",
+    "    X, y, test_size=0.2, random_state=42, stratify=y\n",
+    ")\n",
+    "\n",
+    "dummy = DummyClassifier(strategy=\"most_frequent\")\n",
+    "dummy.fit(X_train.values.reshape(-1, 1), y_train)\n",
+    "\n",
+    "# Validation accuracy\n",
+    "y_val_pred = dummy.predict(X_val.values.reshape(-1, 1))\n",
+    "print(\"Validation Accuracy:\", accuracy_score(y_val, y_val_pred))\n",
+    "\n",
+    "# Test predictions\n",
+    "test_preds = dummy.predict(test_df[\"comment\"].values.reshape(-1, 1))\n",
+    "\n",
+    "submission = pd.DataFrame({\n",
+    "    \"ID\": sample_df[\"ID\"],\n",
+    "    \"label\": test_preds\n",
+    "})\n",
+    "\n",
+    "submission.to_csv(\"submission.csv\", index=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "34d93032",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:24.493429Z",
+     "iopub.status.busy": "2026-02-15T16:42:24.493047Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.499897Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.498901Z"
+    },
+    "papermill": {
+     "duration": 0.012423,
+     "end_time": "2026-02-15T16:42:24.501822",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.489399",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(198000, 15)"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "train_df.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "9f44764b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:24.508187Z",
+     "iopub.status.busy": "2026-02-15T16:42:24.507822Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.513988Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.513033Z"
+    },
+    "papermill": {
+     "duration": 0.011564,
+     "end_time": "2026-02-15T16:42:24.515713",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.504149",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(14,)"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "test_df.columns.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "6b8e0a85",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:24.522182Z",
+     "iopub.status.busy": "2026-02-15T16:42:24.521532Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.598771Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.597540Z"
+    },
+    "papermill": {
+     "duration": 0.08297,
+     "end_time": "2026-02-15T16:42:24.601022",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.518052",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 198000 entries, 0 to 197999\n",
+      "Data columns (total 15 columns):\n",
+      " #   Column        Non-Null Count   Dtype \n",
+      "---  ------        --------------   ----- \n",
+      " 0   created_date  198000 non-null  object\n",
+      " 1   post_id       198000 non-null  int64 \n",
+      " 2   emoticon_1    198000 non-null  int64 \n",
+      " 3   emoticon_2    198000 non-null  int64 \n",
+      " 4   emoticon_3    198000 non-null  int64 \n",
+      " 5   upvote        198000 non-null  int64 \n",
+      " 6   downvote      198000 non-null  int64 \n",
+      " 7   if_1          198000 non-null  int64 \n",
+      " 8   if_2          198000 non-null  int64 \n",
+      " 9   race          52577 non-null   object\n",
+      " 10  religion      52577 non-null   object\n",
+      " 11  gender        52577 non-null   object\n",
+      " 12  disability    198000 non-null  bool  \n",
+      " 13  comment       197999 non-null  object\n",
+      " 14  label         198000 non-null  int64 \n",
+      "dtypes: bool(1), int64(9), object(5)\n",
+      "memory usage: 21.3+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "train_df.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "ba726279",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:24.607825Z",
+     "iopub.status.busy": "2026-02-15T16:42:24.607376Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.616385Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.615313Z"
+    },
+    "papermill": {
+     "duration": 0.014913,
+     "end_time": "2026-02-15T16:42:24.618392",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.603479",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([2, 0, 1, 3])"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y.unique()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "617bb314",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:24.625076Z",
+     "iopub.status.busy": "2026-02-15T16:42:24.624689Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.636196Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.635048Z"
+    },
+    "papermill": {
+     "duration": 0.017494,
+     "end_time": "2026-02-15T16:42:24.638407",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.620913",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "label\n",
+       "0    57.663131\n",
+       "2    31.535354\n",
+       "1     8.039394\n",
+       "3     2.762121\n",
+       "Name: proportion, dtype: float64"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y.value_counts(normalize=True)*100"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "ce35c25f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-15T16:42:24.645382Z",
+     "iopub.status.busy": "2026-02-15T16:42:24.644996Z",
+     "iopub.status.idle": "2026-02-15T16:42:24.735465Z",
+     "shell.execute_reply": "2026-02-15T16:42:24.734361Z"
+    },
+    "papermill": {
+     "duration": 0.096626,
+     "end_time": "2026-02-15T16:42:24.737663",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.641037",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>post_id</th>\n",
+       "      <th>emoticon_1</th>\n",
+       "      <th>emoticon_2</th>\n",
+       "      <th>emoticon_3</th>\n",
+       "      <th>upvote</th>\n",
+       "      <th>downvote</th>\n",
+       "      <th>if_1</th>\n",
+       "      <th>if_2</th>\n",
+       "      <th>label</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>count</th>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "      <td>198000.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mean</th>\n",
+       "      <td>68.447429</td>\n",
+       "      <td>0.279768</td>\n",
+       "      <td>0.048338</td>\n",
+       "      <td>0.121071</td>\n",
+       "      <td>2.607975</td>\n",
+       "      <td>0.666394</td>\n",
+       "      <td>1.906152</td>\n",
+       "      <td>7.956212</td>\n",
+       "      <td>0.793965</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>std</th>\n",
+       "      <td>27.948390</td>\n",
+       "      <td>1.023234</td>\n",
+       "      <td>0.258477</td>\n",
+       "      <td>0.481013</td>\n",
+       "      <td>5.054763</td>\n",
+       "      <td>2.044335</td>\n",
+       "      <td>25.635752</td>\n",
+       "      <td>14.839464</td>\n",
+       "      <td>0.979808</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>min</th>\n",
+       "      <td>20.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>3.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25%</th>\n",
+       "      <td>39.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>4.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>50%</th>\n",
+       "      <td>72.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>6.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>75%</th>\n",
+       "      <td>72.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>3.000000</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>4.000000</td>\n",
+       "      <td>10.000000</td>\n",
+       "      <td>2.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>max</th>\n",
+       "      <td>129.000000</td>\n",
+       "      <td>47.000000</td>\n",
+       "      <td>11.000000</td>\n",
+       "      <td>17.000000</td>\n",
+       "      <td>201.000000</td>\n",
+       "      <td>107.000000</td>\n",
+       "      <td>1860.000000</td>\n",
+       "      <td>1833.000000</td>\n",
+       "      <td>3.000000</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "             post_id     emoticon_1     emoticon_2     emoticon_3  \\\n",
+       "count  198000.000000  198000.000000  198000.000000  198000.000000   \n",
+       "mean       68.447429       0.279768       0.048338       0.121071   \n",
+       "std        27.948390       1.023234       0.258477       0.481013   \n",
+       "min        20.000000       0.000000       0.000000       0.000000   \n",
+       "25%        39.000000       0.000000       0.000000       0.000000   \n",
+       "50%        72.000000       0.000000       0.000000       0.000000   \n",
+       "75%        72.000000       0.000000       0.000000       0.000000   \n",
+       "max       129.000000      47.000000      11.000000      17.000000   \n",
+       "\n",
+       "              upvote       downvote           if_1           if_2  \\\n",
+       "count  198000.000000  198000.000000  198000.000000  198000.000000   \n",
+       "mean        2.607975       0.666394       1.906152       7.956212   \n",
+       "std         5.054763       2.044335      25.635752      14.839464   \n",
+       "min         0.000000       0.000000       0.000000       3.000000   \n",
+       "25%         0.000000       0.000000       0.000000       4.000000   \n",
+       "50%         1.000000       0.000000       0.000000       6.000000   \n",
+       "75%         3.000000       1.000000       4.000000      10.000000   \n",
+       "max       201.000000     107.000000    1860.000000    1833.000000   \n",
+       "\n",
+       "               label  \n",
+       "count  198000.000000  \n",
+       "mean        0.793965  \n",
+       "std         0.979808  \n",
+       "min         0.000000  \n",
+       "25%         0.000000  \n",
+       "50%         0.000000  \n",
+       "75%         2.000000  \n",
+       "max         3.000000  "
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "train_df.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b42d2f3e",
+   "metadata": {
+    "papermill": {
+     "duration": 0.002817,
+     "end_time": "2026-02-15T16:42:24.743492",
+     "exception": false,
+     "start_time": "2026-02-15T16:42:24.740675",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "databundleVersionId": 15295088,
+     "sourceId": 127742,
+     "sourceType": "competition"
+    }
+   ],
+   "dockerImageVersionId": 31259,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.12"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 10.189669,
+   "end_time": "2026-02-15T16:42:25.467868",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2026-02-15T16:42:15.278199",
+   "version": "2.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
